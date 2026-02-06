@@ -15,7 +15,7 @@
       background: #fff; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.08);
       padding: 24px;
     }
-    h1 { font-size: 22px; margin: 0 0 16px; }
+    h1 { font-size: 22px; margin: 0 0 16px; display: flex; align-items: center; gap: 12px; }
     label { display: block; font-weight: 600; margin: 14px 0 6px; }
     input, select, textarea {
       width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #d9dee7;
@@ -52,79 +52,95 @@
     }
     .custom-input.show { display: block; }
     input[type="text"] { box-sizing: border-box; }
+    #langBtn {
+      font-size: 13px; padding: 4px 10px; border-radius: 6px;
+      background: #e5e7eb; color: #1f2a37; margin-left: auto; cursor: pointer;
+      border: 0; font-weight: 600; white-space: nowrap;
+    }
     @media (max-width: 720px) { .row { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>OpenClaw第三方api配置生成器</h1>
+      <h1>
+        <span data-i18n="title">OpenClaw第三方api配置生成器</span>
+        <button id="langBtn">EN</button>
+      </h1>
       <div class="row">
         <div>
-          <label for="baseurl">Base URL</label>
+          <label for="baseurl" data-i18n="label_baseurl">Base URL</label>
           <div class="field-wrapper">
             <select id="baseurl">
               <!-- Options will be dynamically generated -->
             </select>
-            <input type="text" id="baseurl_custom" class="custom-input" placeholder="输入自定义 Base URL" />
+            <input type="text" id="baseurl_custom" class="custom-input" data-i18n-placeholder="placeholder_baseurl" placeholder="输入自定义 Base URL" />
           </div>
         </div>
         <div>
-          <label for="provider">提供商（快捷选择）</label>
+          <label for="provider" data-i18n="label_provider">提供商（快捷选择）</label>
           <div class="field-wrapper">
             <select id="provider">
               <!-- Options will be dynamically generated -->
             </select>
-            <input type="text" id="provider_custom" class="custom-input" placeholder="输入自定义提供商" />
+            <input type="text" id="provider_custom" class="custom-input" data-i18n-placeholder="placeholder_provider" placeholder="输入自定义提供商" />
           </div>
         </div>
       </div>
 
       <div class="row">
         <div>
-          <label for="apimode">API模式</label>
+          <label for="apimode" data-i18n="label_apimode">API模式</label>
           <div class="field-wrapper">
             <select id="apimode">
               <option value="anthropic-messages">anthropic-messages</option>
               <option value="openai-completions">openai-completions</option>
               <option value="google-generative-ai">google-generative-ai</option>
-              <option value="custom">自定义</option>
+              <option value="custom" data-i18n="custom">自定义</option>
             </select>
-            <input type="text" id="apimode_custom" class="custom-input" placeholder="输入自定义 API 模式" />
+            <input type="text" id="apimode_custom" class="custom-input" data-i18n-placeholder="placeholder_apimode" placeholder="输入自定义 API 模式" />
           </div>
         </div>
         <div>
-          <label for="model_id">模型ID</label>
+          <label for="model_id" data-i18n="label_model_id">模型ID</label>
           <div class="field-wrapper">
             <select id="model_id">
               <option value="claude-sonnet-4-5-20250929">claude-sonnet-4-5-20250929</option>
+              <option value="claude-sonnet-4.5-agent">claude-sonnet-4.5-agent</option>
               <option value="gpt-5.2">gpt-5.2</option>
               <option value="gemini-3-pro-preview">gemini-3-pro-preview</option>
-              <option value="custom">自定义</option>
+              <option value="custom" data-i18n="custom">自定义</option>
             </select>
-            <input type="text" id="model_id_custom" class="custom-input" placeholder="输入自定义模型 ID" />
+            <input type="text" id="model_id_custom" class="custom-input" data-i18n-placeholder="placeholder_model_id" placeholder="输入自定义模型 ID" />
           </div>
         </div>
       </div>
 
-      <label for="apikey">API Key</label>
-      <input id="apikey" placeholder="请输入 apikey，请至第三方API站中的令牌管理处获取" />
+      <label for="apikey" data-i18n="label_apikey">API Key</label>
+      <input id="apikey" data-i18n-placeholder="placeholder_apikey" placeholder="请输入 apikey，请至第三方API站中的令牌管理处获取" />
 
-      <label for="config">Config (JSON/String)</label>
-      <textarea id="config" placeholder="粘贴您的~/.openclaw/openclaw.json内容，或在您的openclaw的web控制台中的setting下的config选项卡中，切换为Raw模式找到"></textarea>
+      <label for="config" data-i18n="label_config">Config (JSON/String)</label>
+      <textarea id="config" data-i18n-placeholder="placeholder_config" placeholder="粘贴您的~/.openclaw/openclaw.json内容，或在您的openclaw的web控制台中的setting下的config选项卡中，切换为Raw模式找到"></textarea>
 
       <div class="actions">
-        <button id="sendBtn">发送</button>
-        <span class="muted" id="status">就绪</span>
+        <button id="sendBtn" data-i18n="btn_send">发送</button>
+        <span class="muted" id="status" data-i18n="status_ready">就绪</span>
       </div>
 
       <div class="codebox">
-        <button id="copyBtn" class="copy-btn">复制</button>
-        <pre><code id="output">响应将显示在这里</code></pre>
+        <button id="copyBtn" class="copy-btn" data-i18n="btn_copy">复制</button>
+        <pre><code id="output" data-i18n="output_placeholder">响应将显示在这里</code></pre>
       </div>
     </div>
   </div>
 
+  <script src="lang.js"></script>
   <script src="script.js"></script>
+  <script>
+    setLang(currentLang);
+    document.getElementById("langBtn").addEventListener("click", () => {
+      setLang(currentLang === "zh" ? "en" : "zh");
+    });
+  </script>
 </body>
 </html>

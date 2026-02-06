@@ -22,7 +22,7 @@ Object.keys(providerBaseUrlMap).forEach(provider => {
 });
 const customProviderOption = document.createElement("option");
 customProviderOption.value = "custom";
-customProviderOption.textContent = "自定义";
+customProviderOption.textContent = t("custom");
 providerSelect.appendChild(customProviderOption);
 
 // Dynamically populate baseurl select
@@ -36,7 +36,7 @@ uniqueUrls.forEach(url => {
 });
 const customBaseurlOption = document.createElement("option");
 customBaseurlOption.value = "custom";
-customBaseurlOption.textContent = "自定义";
+customBaseurlOption.textContent = t("custom");
 baseurlSelect.appendChild(customBaseurlOption);
 
 // Handle custom input visibility
@@ -44,7 +44,7 @@ const fields = ["baseurl", "provider", "apimode", "model_id"];
 fields.forEach(field => {
   const select = document.getElementById(field);
   const customInput = document.getElementById(`${field}_custom`);
-  
+
   select.addEventListener("change", () => {
     if (select.value === "custom") {
       customInput.classList.add("show");
@@ -59,12 +59,12 @@ const baseurlCustom = document.getElementById("baseurl_custom");
 
 providerSelect.addEventListener("change", () => {
   const provider = providerSelect.value;
-  
+
   if (provider === "custom") {
     // Don't change baseurl when provider is custom
     return;
   }
-  
+
   if (providerBaseUrlMap[provider]) {
     baseurlSelect.value = providerBaseUrlMap[provider];
     baseurlCustom.classList.remove("show");
@@ -76,11 +76,11 @@ function setStatus(text) { statusEl.textContent = text; }
 copyBtn.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(outputEl.textContent || "");
-    copyBtn.textContent = "已复制";
-    setTimeout(() => (copyBtn.textContent = "复制"), 1200);
+    copyBtn.textContent = t("copied");
+    setTimeout(() => (copyBtn.textContent = t("btn_copy")), 1200);
   } catch {
-    copyBtn.textContent = "失败";
-    setTimeout(() => (copyBtn.textContent = "复制"), 1200);
+    copyBtn.textContent = t("status_failed");
+    setTimeout(() => (copyBtn.textContent = t("btn_copy")), 1200);
   }
 });
 
@@ -104,32 +104,32 @@ sendBtn.addEventListener("click", async () => {
 
   // Validation
   if (!payload.config) {
-    outputEl.textContent = "错误: 请输入 Config JSON";
-    setStatus("失败");
+    outputEl.textContent = t("err_no_config");
+    setStatus(t("status_failed"));
     return;
   }
   if (!payload.baseurl) {
-    outputEl.textContent = "错误: 请选择或输入 Base URL";
-    setStatus("失败");
+    outputEl.textContent = t("err_no_baseurl");
+    setStatus(t("status_failed"));
     return;
   }
   if (!payload.apikey) {
-    outputEl.textContent = "错误: 请输入 API Key";
-    setStatus("失败");
+    outputEl.textContent = t("err_no_apikey");
+    setStatus(t("status_failed"));
     return;
   }
 
-  setStatus("处理中...");
+  setStatus(t("status_processing"));
   sendBtn.disabled = true;
   outputEl.textContent = "";
 
   try {
     const result = processConfig(payload);
     outputEl.textContent = JSON.stringify(result, null, 2);
-    setStatus("完成");
+    setStatus(t("status_done"));
   } catch (err) {
-    outputEl.textContent = "错误: " + String(err.message || err);
-    setStatus("失败");
+    outputEl.textContent = String(err.message || err);
+    setStatus(t("status_failed"));
   } finally {
     sendBtn.disabled = false;
   }
@@ -169,7 +169,7 @@ function processConfig(payload) {
     try {
       userConfig = JSON.parse(payload.config);
     } catch (e) {
-      throw new Error("配置 JSON 格式错误: " + e.message);
+      throw new Error(t("err_json_parse") + ": " + e.message);
     }
 
     // Step 4: Merge everything (replace logic)

@@ -1,122 +1,127 @@
-# OpenClaw 第三方 API 配置生成器
+**English** | [中文](README_zh.md)
 
-一个简洁的 Web 工具，用于快速生成 OpenClaw 配置文件。
+# OpenClaw 3rd-Party API Config Generator
 
-🌐 **在线体验**：[https://openclaw-easy-config.pages.dev/](https://openclaw-easy-config.pages.dev/)
+A lightweight web tool for quickly generating OpenClaw configuration files.
 
-## ✨ 功能特点
+🌐 **Live Demo**: [https://openclaw-easy-config.pages.dev/](https://openclaw-easy-config.pages.dev/)
 
-- 🎯 支持多个第三方 API 提供商（ollama 等）
-- 🔧 可自定义 Base URL、提供商、API 模式和模型 ID
-- 📋 一键复制生成的配置 JSON
-- 💻 无需后端，纯前端实现
+## ✨ Features
 
-## 🚀 快速开始
+- 🎯 Supports multiple 3rd-party API providers (ollama, etc.)
+- 🔧 Customizable Base URL, provider, API mode, and model ID
+- 📋 One-click copy of generated config JSON
+- 💻 No backend required — runs entirely in the browser
+- 🌐 Bilingual support (English / Chinese)
 
-### 在线部署（推荐）
+## 🚀 Quick Start
 
-#### 方式 1：Cloudflare Pages（免费 + CDN 加速）
+### Cloud Deployment (Recommended)
 
-1. Fork 本仓库到你的 GitHub 账号
-2. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
-3. 进入 **Workers & Pages** → **Create application** → **想要部署 Pages？开始使用** → **Connect to Git**
-4. 选择你 Fork 的仓库
-5. 构建设置：
-   - **Build command**: 留空
+#### Option 1: Cloudflare Pages (Free + CDN)
+
+1. Fork this repository to your GitHub account
+2. Log in to [Cloudflare Dashboard](https://dash.cloudflare.com/)
+3. Go to **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**
+4. Select your forked repository
+5. Build settings:
+   - **Build command**: leave empty
    - **Build output directory**: `/`
-6. 点击 **Save and Deploy**
-7. 几秒后即可通过 `https://your-project.pages.dev` 访问
+6. Click **Save and Deploy**
+7. Access via `https://your-project.pages.dev`
 
-#### 方式 2：GitHub Pages（免费）
+#### Option 2: GitHub Pages (Free)
 
-1. Fork 本仓库
-2. 进入仓库 **Settings** → **Pages**
-3. Source 选择 `main` 分支，目录选择 `/`（root）
-4. 保存后通过 `https://你的用户名.github.io/仓库名/` 访问
+1. Fork this repository
+2. Go to repository **Settings** → **Pages**
+3. Set Source to `main` branch, directory `/` (root)
+4. Access via `https://your-username.github.io/repo-name/`
 
-#### 方式 3：Vercel（一键部署）
+#### Option 3: Vercel (One-click Deploy)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ztj7728/openclaw-easy-config)
 
-**为什么推荐部署到云端？**
-- ✅ 无需安装，随时随地访问
-- ✅ 全球 CDN 加速，速度更快
-- ✅ 免费且永久可用
-- ✅ 支持 HTTPS 安全连接
-- ✅ 自动更新，push 代码即部署
+**Why deploy to the cloud?**
+- ✅ No installation needed — access from anywhere
+- ✅ Global CDN for faster loading
+- ✅ Free and always available
+- ✅ HTTPS secure connection
+- ✅ Auto-deploy on push
 
-### 本地使用
+### Local Usage
 
-直接在浏览器中打开 `index.html` 文件即可使用。
+Open `index.html` directly in your browser.
 
-### 本地开发
+### Local Development
 
-1. 克隆仓库：
+1. Clone the repository:
 ```bash
 git clone https://github.com/ztj7728/openclaw-easy-config.git
 cd openclaw-easy-config
 ```
 
-2. 双击打开 `index.html` 或使用 HTTP 服务器：
+2. Open `index.html` directly or use an HTTP server:
 
 ```bash
 # Python 3
 python -m http.server 8000
 
-# Node.js (需要安装 http-server)
+# Node.js
 npx http-server
 
 # PHP
 php -S localhost:8000
 ```
 
-然后访问 `http://localhost:8000`
+Then visit `http://localhost:8000`
 
-## 📖 使用说明
+## 📖 Usage
 
-1. **选择或输入 Base URL**：从下拉列表选择预设的 API 地址，或选择"自定义"输入自己的地址
-2. **选择提供商**：选择 API 提供商（会自动匹配对应的 Base URL）
-3. **配置 API 模式**：选择 `anthropic-messages`、`openai-completions` 或其他模式
-4. **输入模型 ID**：选择预设模型或自定义模型 ID
-5. **输入 API Key**：填入从第三方 API 站获取的令牌
-6. **粘贴原配置**：粘贴您的 `~/.openclaw/openclaw.json` 内容
-7. **点击发送**：生成新的配置文件
-8. **复制结果**：点击"复制"按钮将生成的配置复制到剪贴板
+1. **Select or enter Base URL** — pick a preset API address from the dropdown, or choose "Custom"
+2. **Select Provider** — choose an API provider (Base URL auto-fills accordingly)
+3. **Set API Mode** — select `anthropic-messages`, `openai-completions`, or others
+4. **Enter Model ID** — pick a preset model or enter a custom model ID
+5. **Enter API Key** — paste the token from your 3rd-party API provider
+6. **Paste Config** — paste your `~/.openclaw/openclaw.json` content
+7. **Click Send** — generate the new configuration
+8. **Copy Result** — click the "Copy" button to copy the output to clipboard
 
-## 🛠️ 技术栈
+## 🛠️ Tech Stack
 
-- 纯 HTML + CSS + JavaScript
-- 无任何外部依赖
-- 使用现代 ES6+ 语法
+- Pure HTML + CSS + JavaScript
+- Zero external dependencies
+- Modern ES6+ syntax
 
-## 📦 文件结构
+## 📦 File Structure
 
 ```
 openclaw_3rd_api_config/
-├── index.html      # 主页面
-├── script.js       # JavaScript 逻辑
-├── README.md       # 项目说明
-└── LICENSE         # MIT 许可证
+├── index.html      # Main page
+├── script.js       # Application logic
+├── lang.js         # i18n translations
+├── README.md       # Documentation (English)
+├── README_zh.md    # Documentation (Chinese)
+└── LICENSE         # MIT License
 ```
 
-## 🤝 贡献
+## 🤝 Contributing
 
-欢迎提交 Issue 和 Pull Request！
+Issues and Pull Requests are welcome!
 
-1. Fork 本仓库
-2. 创建新分支 (`git checkout -b feature/amazing-feature`)
-3. 提交更改 (`git commit -m 'Add some amazing feature'`)
-4. 推送到分支 (`git push origin feature/amazing-feature`)
-5. 提交 Pull Request
+1. Fork this repository
+2. Create a new branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 📄 许可证
+## 📄 License
 
-本项目采用 [MIT 许可证](LICENSE)。
+This project is licensed under the [MIT License](LICENSE).
 
-## 🙏 致谢
+## 🙏 Acknowledgments
 
-感谢所有贡献者和 OpenClaw 社区的支持！
+Thanks to all contributors and the OpenClaw community!
 
 ---
 
-**提示**：如需添加新的 API 提供商，请编辑 `script.js` 中的 `providerBaseUrlMap` 对象。
+**Tip**: To add a new API provider, edit the `providerBaseUrlMap` object in `script.js`.
