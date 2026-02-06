@@ -1,16 +1,15 @@
 # OpenClaw 第三方 API 配置生成器
 
-一个简洁的 Web 工具，用于快速生成 OpenClaw 第三方 API 配置文件。
+一个简洁的 Web 工具，用于快速生成 OpenClaw 配置文件。
 
-🌐 **在线体验**：[https://your-project.pages.dev](https://your-project.pages.dev)（部署后替换）
+🌐 **在线体验**：[https://openclaw-easy-config.pages.dev/](https://openclaw-easy-config.pages.dev/)
 
 ## ✨ 功能特点
 
-- 🎯 支持多个第三方 API 提供商（milocode、ollama、duckcodingJP 等）
+- 🎯 支持多个第三方 API 提供商（ollama 等）
 - 🔧 可自定义 Base URL、提供商、API 模式和模型 ID
 - 📋 一键复制生成的配置 JSON
 - 💻 无需后端，纯前端实现
-- 🎨 现代化 UI 设计，支持响应式布局
 
 ## 🚀 快速开始
 
@@ -20,7 +19,7 @@
 
 1. Fork 本仓库到你的 GitHub 账号
 2. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
-3. 进入 **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**
+3. 进入 **Workers & Pages** → **Create application** → **想要部署 Pages？开始使用** → **Connect to Git**
 4. 选择你 Fork 的仓库
 5. 构建设置：
    - **Build command**: 留空
@@ -37,7 +36,7 @@
 
 #### 方式 3：Vercel（一键部署）
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/你的用户名/openclaw_3rd_api_config)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ztj7728/openclaw-easy-config)
 
 **为什么推荐部署到云端？**
 - ✅ 无需安装，随时随地访问
@@ -54,8 +53,8 @@
 
 1. 克隆仓库：
 ```bash
-git clone https://github.com/你的用户名/openclaw_3rd_api_config.git
-cd openclaw_3rd_api_config
+git clone https://github.com/ztj7728/openclaw-easy-config.git
+cd openclaw-easy-config
 ```
 
 2. 双击打开 `index.html` 或使用 HTTP 服务器：
