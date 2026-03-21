@@ -27,7 +27,26 @@ const modelApiModeMap = {
   "gemini-3-pro-preview": "google-generative-ai"
 };
 
+// Model capability presets - ONLY MAINTAIN THIS!
+const modelCapabilityPresetMap = {
+  "deepseek-reasoner": {
+    reasoning: true
+  },
+  "gpt-5.4": {
+    input: ["text", "image"],
+    reasoning: true
+  },
+  "gpt-5.3-codex": {
+    reasoning: true
+  },
+  "gemini-3-pro-preview": {
+    reasoning: true,
+    input: ["text", "image"]
+  }
+};
+
 const modelOptions = Object.keys(modelApiModeMap);
+const apimodeOptions = [...new Set(Object.values(modelApiModeMap))];
 
 // Dynamically populate provider select
 const providerSelect = document.getElementById("provider");
@@ -56,23 +75,8 @@ customBaseurlOption.value = "custom";
 customBaseurlOption.textContent = t("custom");
 baseurlSelect.appendChild(customBaseurlOption);
 
-// Dynamically populate apimode select
-const apimodeSelect = document.getElementById("apimode");
-apimodeSelect.innerHTML = "";
-const uniqueApiModes = [...new Set(Object.values(modelApiModeMap))];
-uniqueApiModes.forEach(mode => {
-  const option = document.createElement("option");
-  option.value = mode;
-  option.textContent = mode;
-  apimodeSelect.appendChild(option);
-});
-const customApimodeOption = document.createElement("option");
-customApimodeOption.value = "custom";
-customApimodeOption.textContent = t("custom");
-apimodeSelect.appendChild(customApimodeOption);
-
 // Handle custom input visibility
-const fields = ["baseurl", "provider", "apimode"];
+const fields = ["baseurl", "provider"];
 fields.forEach(field => {
   const select = document.getElementById(field);
   const customInput = document.getElementById(`${field}_custom`);
@@ -94,42 +98,104 @@ function updateModelRemoveState() {
   });
 }
 
-function syncApimodeWithModel(modelId) {
-  if (!modelId || !modelApiModeMap[modelId]) {
+function syncApimodeWithModel(modelId, apimodeSelect, customInput) {
+  if (!modelId || !modelApiModeMap[modelId] || !apimodeSelect) {
     return;
   }
 
   apimodeSelect.value = modelApiModeMap[modelId];
-  document.getElementById("apimode_custom").classList.remove("show");
+  if (customInput) {
+    customInput.classList.remove("show");
+  }
 }
 
-function createModelRow(initialValue) {
+function syncCapabilitiesWithModel(modelId, reasoningCheckbox, imageCheckbox) {
+  if (!reasoningCheckbox || !imageCheckbox) {
+    return;
+  }
+
+  const capabilityPreset = modelCapabilityPresetMap[modelId] || {};
+  const inputTypes = Array.isArray(capabilityPreset.input) ? capabilityPreset.input : [];
+
+  reasoningCheckbox.checked = capabilityPreset.reasoning === true;
+  imageCheckbox.checked = inputTypes.includes("image");
+}
+
+function createCapabilityOption(translationKey, className) {
+  const label = document.createElement("label");
+  label.className = "capability-option";
+
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.className = className;
+
+  const text = document.createElement("span");
+  text.setAttribute("data-i18n", translationKey);
+  text.textContent = t(translationKey);
+
+  label.appendChild(checkbox);
+  label.appendChild(text);
+
+  return { label, checkbox };
+}
+
+function createModelRow(initialModel) {
   const row = document.createElement("div");
   row.className = "model-row";
 
-  const fieldWrapper = document.createElement("div");
-  fieldWrapper.className = "field-wrapper";
+  const modelWrapper = document.createElement("div");
+  modelWrapper.className = "field-wrapper";
 
-  const select = document.createElement("select");
-  select.className = "model-select";
+  const modelSelect = document.createElement("select");
+  modelSelect.className = "model-select";
 
   modelOptions.forEach(modelId => {
     const option = document.createElement("option");
     option.value = modelId;
     option.textContent = modelId;
-    select.appendChild(option);
+    modelSelect.appendChild(option);
   });
 
   const customOption = document.createElement("option");
   customOption.value = "custom";
   customOption.textContent = t("custom");
-  select.appendChild(customOption);
+  modelSelect.appendChild(customOption);
 
-  const customInput = document.createElement("input");
-  customInput.type = "text";
-  customInput.className = "custom-input model-custom";
-  customInput.setAttribute("data-i18n-placeholder", "placeholder_model_id");
-  customInput.placeholder = t("placeholder_model_id");
+  const modelCustomInput = document.createElement("input");
+  modelCustomInput.type = "text";
+  modelCustomInput.className = "custom-input model-custom";
+  modelCustomInput.setAttribute("data-i18n-placeholder", "placeholder_model_id");
+  modelCustomInput.placeholder = t("placeholder_model_id");
+
+  const apimodeWrapper = document.createElement("div");
+  apimodeWrapper.className = "field-wrapper";
+
+  const apimodeSelect = document.createElement("select");
+  apimodeSelect.className = "model-apimode-select";
+
+  apimodeOptions.forEach(mode => {
+    const option = document.createElement("option");
+    option.value = mode;
+    option.textContent = mode;
+    apimodeSelect.appendChild(option);
+  });
+
+  const customApimodeOption = document.createElement("option");
+  customApimodeOption.value = "custom";
+  customApimodeOption.textContent = t("custom");
+  apimodeSelect.appendChild(customApimodeOption);
+
+  const apimodeCustomInput = document.createElement("input");
+  apimodeCustomInput.type = "text";
+  apimodeCustomInput.className = "custom-input model-apimode-custom";
+  apimodeCustomInput.setAttribute("data-i18n-placeholder", "placeholder_apimode");
+  apimodeCustomInput.placeholder = t("placeholder_apimode");
+
+  const capabilityWrapper = document.createElement("div");
+  capabilityWrapper.className = "model-capabilities";
+
+  const reasoningOption = createCapabilityOption("label_model_reasoning", "model-reasoning");
+  const imageOption = createCapabilityOption("label_model_image", "model-image");
 
   const removeBtn = document.createElement("button");
   removeBtn.type = "button";
@@ -137,12 +203,21 @@ function createModelRow(initialValue) {
   removeBtn.setAttribute("data-i18n", "btn_remove_model");
   removeBtn.textContent = t("btn_remove_model");
 
-  select.addEventListener("change", () => {
-    if (select.value === "custom") {
-      customInput.classList.add("show");
+  modelSelect.addEventListener("change", () => {
+    if (modelSelect.value === "custom") {
+      modelCustomInput.classList.add("show");
     } else {
-      customInput.classList.remove("show");
-      syncApimodeWithModel(select.value);
+      modelCustomInput.classList.remove("show");
+      syncApimodeWithModel(modelSelect.value, apimodeSelect, apimodeCustomInput);
+      syncCapabilitiesWithModel(modelSelect.value, reasoningOption.checkbox, imageOption.checkbox);
+    }
+  });
+
+  apimodeSelect.addEventListener("change", () => {
+    if (apimodeSelect.value === "custom") {
+      apimodeCustomInput.classList.add("show");
+    } else {
+      apimodeCustomInput.classList.remove("show");
     }
   });
 
@@ -151,40 +226,74 @@ function createModelRow(initialValue) {
     updateModelRemoveState();
   });
 
-  fieldWrapper.appendChild(select);
-  fieldWrapper.appendChild(customInput);
-  row.appendChild(fieldWrapper);
+  modelWrapper.appendChild(modelSelect);
+  modelWrapper.appendChild(modelCustomInput);
+  apimodeWrapper.appendChild(apimodeSelect);
+  apimodeWrapper.appendChild(apimodeCustomInput);
+  capabilityWrapper.appendChild(reasoningOption.label);
+  capabilityWrapper.appendChild(imageOption.label);
+  row.appendChild(modelWrapper);
+  row.appendChild(apimodeWrapper);
+  row.appendChild(capabilityWrapper);
   row.appendChild(removeBtn);
 
-  if (initialValue) {
-    if (modelOptions.includes(initialValue)) {
-      select.value = initialValue;
-      syncApimodeWithModel(initialValue);
+  if (initialModel) {
+    if (modelOptions.includes(initialModel.id)) {
+      modelSelect.value = initialModel.id;
+      syncApimodeWithModel(initialModel.id, apimodeSelect, apimodeCustomInput);
     } else {
-      select.value = "custom";
-      customInput.classList.add("show");
-      customInput.value = initialValue;
+      modelSelect.value = "custom";
+      modelCustomInput.classList.add("show");
+      modelCustomInput.value = initialModel.id;
     }
+
+    if (initialModel.api) {
+      if (apimodeOptions.includes(initialModel.api)) {
+        apimodeSelect.value = initialModel.api;
+      } else {
+        apimodeSelect.value = "custom";
+        apimodeCustomInput.classList.add("show");
+        apimodeCustomInput.value = initialModel.api;
+      }
+    }
+
+    reasoningOption.checkbox.checked = initialModel.reasoning === true;
+    imageOption.checkbox.checked = Array.isArray(initialModel.input) && initialModel.input.includes("image");
+  } else {
+    modelSelect.value = modelOptions[0];
+    syncApimodeWithModel(modelOptions[0], apimodeSelect, apimodeCustomInput);
+    syncCapabilitiesWithModel(modelOptions[0], reasoningOption.checkbox, imageOption.checkbox);
   }
 
   modelListEl.appendChild(row);
   updateModelRemoveState();
 }
 
-function getModelIds() {
+function getModelConfigs() {
   const rows = modelListEl.querySelectorAll(".model-row");
-  const modelIds = [];
+  const modelConfigs = [];
 
   rows.forEach(row => {
-    const select = row.querySelector(".model-select");
-    const customInput = row.querySelector(".model-custom");
-    const value = select.value === "custom" ? customInput.value.trim() : select.value;
-    if (value) {
-      modelIds.push(value);
+    const modelSelect = row.querySelector(".model-select");
+    const modelCustomInput = row.querySelector(".model-custom");
+    const apimodeSelect = row.querySelector(".model-apimode-select");
+    const apimodeCustomInput = row.querySelector(".model-apimode-custom");
+    const reasoningCheckbox = row.querySelector(".model-reasoning");
+    const imageCheckbox = row.querySelector(".model-image");
+    const modelId = modelSelect.value === "custom" ? modelCustomInput.value.trim() : modelSelect.value;
+    const apiMode = apimodeSelect.value === "custom" ? apimodeCustomInput.value.trim() : apimodeSelect.value;
+
+    if (modelId || apiMode) {
+      modelConfigs.push({
+        id: modelId,
+        api: apiMode,
+        reasoning: reasoningCheckbox.checked,
+        supportsImageInput: imageCheckbox.checked
+      });
     }
   });
 
-  return modelIds;
+  return modelConfigs;
 }
 
 addModelBtn.addEventListener("click", () => {
@@ -192,7 +301,6 @@ addModelBtn.addEventListener("click", () => {
 });
 
 createModelRow();
-syncApimodeWithModel(modelOptions[0]);
 
 // Bind provider to baseurl
 const baseurlCustom = document.getElementById("baseurl_custom");
@@ -257,9 +365,8 @@ sendBtn.addEventListener("click", async () => {
     config: document.getElementById("config").value.trim(),
     baseurl: getValue("baseurl"),
     apikey: document.getElementById("apikey").value.trim(),
-    apimode: getValue("apimode"),
     provider: getValue("provider"),
-    model_id: getModelIds()
+    models: getModelConfigs()
   };
 
   // Validation
@@ -278,8 +385,18 @@ sendBtn.addEventListener("click", async () => {
     setStatus(t("status_failed"));
     return;
   }
-  if (!payload.model_id.length) {
+  if (!payload.models.length) {
     outputEl.textContent = t("err_no_model");
+    setStatus(t("status_failed"));
+    return;
+  }
+  if (payload.models.some(model => !model.id)) {
+    outputEl.textContent = t("err_no_model");
+    setStatus(t("status_failed"));
+    return;
+  }
+  if (payload.models.some(model => !model.api)) {
+    outputEl.textContent = t("err_no_apimode");
     setStatus(t("status_failed"));
     return;
   }
@@ -302,13 +419,14 @@ sendBtn.addEventListener("click", async () => {
 
 function processConfig(payload) {
   try {
-    const modelIds = payload.model_id;
-    const primaryModelId = modelIds[0];
+    const modelConfigs = payload.models;
+    const primaryModelId = modelConfigs[0].id;
+    const primaryImageModel = modelConfigs.find(model => model.supportsImageInput);
 
     // Step 1: Build agents object
     const agentModels = {};
-    modelIds.forEach(id => {
-      agentModels[`${payload.provider}/${id}`] = { alias: id };
+    modelConfigs.forEach(model => {
+      agentModels[`${payload.provider}/${model.id}`] = { alias: model.id };
     });
 
     const agents = {
@@ -327,10 +445,12 @@ function processConfig(payload) {
         [payload.provider]: {
           "baseUrl": payload.baseurl,
           "apiKey": payload.apikey,
-          "api": payload.apimode,
-          "models": modelIds.map(id => ({
-            "id": id,
-            "name": id
+          "models": modelConfigs.map(model => ({
+            "id": model.id,
+            "name": model.id,
+            "api": model.api,
+            ...(model.reasoning ? { "reasoning": true } : {}),
+            ...(model.supportsImageInput ? { "input": ["text", "image"] } : {})
           }))
         }
       }
@@ -339,11 +459,35 @@ function processConfig(payload) {
     // Step 3: Parse user's config
     const userConfig = parseConfigInput(payload.config);
 
-    // Step 4: Merge everything (replace logic)
+    const existingAgents = userConfig.agents && typeof userConfig.agents === "object" && !Array.isArray(userConfig.agents)
+      ? userConfig.agents
+      : {};
+    const existingAgentDefaults = existingAgents.defaults && typeof existingAgents.defaults === "object" && !Array.isArray(existingAgents.defaults)
+      ? existingAgents.defaults
+      : {};
+    const existingImageModelDefaults = existingAgentDefaults.imageModel && typeof existingAgentDefaults.imageModel === "object" && !Array.isArray(existingAgentDefaults.imageModel)
+      ? existingAgentDefaults.imageModel
+      : {};
+    const nextImageModelDefaults = primaryImageModel
+      ? {
+          ...existingImageModelDefaults,
+          primary: `${payload.provider}/${primaryImageModel.id}`
+        }
+      : undefined;
+
+    // Step 4: Merge everything while only replacing agents.defaults.model/models
     const result = {
       ...userConfig,
       models: models,
-      agents: agents
+      agents: {
+        ...existingAgents,
+        defaults: {
+          ...existingAgentDefaults,
+          model: agents.defaults.model,
+          models: agents.defaults.models,
+          ...(nextImageModelDefaults ? { imageModel: nextImageModelDefaults } : {})
+        }
+      }
     };
 
     // Remove auth field if exists

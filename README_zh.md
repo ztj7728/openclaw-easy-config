@@ -9,7 +9,7 @@
 ## ✨ 功能特点
 
 - 🎯 支持多个第三方 API 提供商（ollama 等）
-- 🔧 可自定义 Base URL、提供商、API 模式和多个模型 ID
+- 🔧 可自定义 Base URL、提供商，以及按模型绑定的 API 模式、多个模型 ID，并可选声明思考与图像理解能力
 - 🧩 Config 输入支持 JSON5，包括注释、尾随逗号等语法
 - 📋 一键复制生成的配置 JSON
 - 💻 无需后端，纯前端实现
@@ -91,12 +91,13 @@ php -S localhost:8000
 
 1. **选择或输入 Base URL**：从下拉列表选择预设的 API 地址，或选择"自定义"输入自己的地址
 2. **选择提供商**：选择 API 提供商（会自动匹配对应的 Base URL）
-3. **配置 API 模式**：选择 `anthropic-messages`、`openai-completions` 或其他模式
-4. **输入模型 ID**：可添加多个模型 ID，不需要的可删除
-5. **输入 API Key**：填入从第三方 API 站获取的令牌
-6. **粘贴原配置**：粘贴您的 `~/.openclaw/openclaw.json` 内容，支持 JSON 或 JSON5 格式
-7. **点击发送**：生成新的配置文件
-8. **复制结果**：点击"复制"按钮将生成的配置复制到剪贴板
+3. **添加模型**：可添加多个模型 ID，不需要的可删除
+4. **为每个模型配置 API 模式**：为每个模型选择 `anthropic-messages`、`openai-completions` 或自定义模式
+5. **按需勾选能力**：勾选“支持思考”会写入 `"reasoning": true`，勾选“支持图像理解”会写入 `"input": ["text", "image"]`
+6. **输入 API Key**：填入从第三方 API 站获取的令牌
+7. **粘贴原配置**：粘贴您的 `~/.openclaw/openclaw.json` 内容，支持 JSON 或 JSON5 格式
+8. **点击发送**：生成新的配置文件
+9. **复制结果**：点击"复制"按钮将生成的配置复制到剪贴板
 
 ## 🛠️ 技术栈
 
@@ -136,4 +137,4 @@ openclaw_3rd_api_config/
 
 ---
 
-**提示**：如需添加新的 API 提供商，请编辑 `script.js` 中的 `providerBaseUrlMap` 对象。
+**提示**：如需添加新的 API 提供商，请编辑 `script.js` 中的 `providerBaseUrlMap`；如需为模型预设默认 API 模式，请编辑 `script.js` 中的 `modelApiModeMap`。

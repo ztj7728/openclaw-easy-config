@@ -9,7 +9,7 @@ A lightweight web tool for quickly generating OpenClaw configuration files.
 ## ✨ Features
 
 - 🎯 Supports multiple 3rd-party API providers (ollama, etc.)
-- 🔧 Customizable Base URL, provider, API mode, and model IDs
+- 🔧 Customizable Base URL, provider, per-model API mode and model IDs, plus optional reasoning and image understanding flags
 - 🧩 Supports JSON5 input for Config, including comments and trailing commas
 - 📋 One-click copy of generated config JSON
 - 💻 No backend required — runs entirely in the browser
@@ -91,12 +91,13 @@ Then visit `http://localhost:8000`
 
 1. **Select or enter Base URL** — pick a preset API address from the dropdown, or choose "Custom"
 2. **Select Provider** — choose an API provider (Base URL auto-fills accordingly)
-3. **Set API Mode** — select `anthropic-messages`, `openai-completions`, or others
-4. **Enter Model IDs** — add one or more model IDs, you can remove any you don't need
-5. **Enter API Key** — paste the token from your 3rd-party API provider
-6. **Paste Config** — paste your `~/.openclaw/openclaw.json` content in JSON or JSON5 format
-7. **Click Send** — generate the new configuration
-8. **Copy Result** — click the "Copy" button to copy the output to clipboard
+3. **Add Models** — add one or more model IDs
+4. **Set API Mode for Each Model** — choose `anthropic-messages`, `openai-completions`, or a custom mode for every model
+5. **Toggle Capabilities When Needed** — enable reasoning to output `"reasoning": true`, and enable image understanding to output `"input": ["text", "image"]`
+6. **Enter API Key** — paste the token from your 3rd-party API provider
+7. **Paste Config** — paste your `~/.openclaw/openclaw.json` content in JSON or JSON5 format
+8. **Click Send** — generate the new configuration
+9. **Copy Result** — click the "Copy" button to copy the output to clipboard
 
 ## 🛠️ Tech Stack
 
@@ -136,4 +137,4 @@ Thanks to all contributors and the OpenClaw community!
 
 ---
 
-**Tip**: To add a new API provider, edit the `providerBaseUrlMap` object in `script.js`.
+**Tip**: To add a new API provider, edit `providerBaseUrlMap`; to define a default API mode for a model, edit `modelApiModeMap` in `script.js`.

@@ -53,10 +53,30 @@
     .custom-input.show { display: block; }
     .model-list { display: grid; gap: 10px; }
     .model-row {
-      display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start;
+      display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(220px, .9fr); gap: 16px; align-items: start;
     }
     .model-row .field-wrapper { width: 100%; }
+    .model-list-head {
+      display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(220px, .9fr); gap: 16px;
+      margin-bottom: 8px; font-size: 12px; color: #6b7280; font-weight: 600;
+    }
+    .model-capabilities {
+      display: grid; gap: 10px; padding: 12px; border: 1px solid #d9dee7; border-radius: 12px;
+      background: linear-gradient(180deg, #fbfcfe 0%, #f4f7fb 100%);
+    }
+    .capability-option {
+      display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600;
+      color: #334155; min-height: 20px; margin: 0;
+    }
+    .capability-option input {
+      width: 16px; height: 16px; margin: 0; accent-color: #2563eb; flex: 0 0 auto;
+    }
     .model-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .remove-model {
+      grid-column: 1 / -1;
+      justify-self: end;
+      min-height: 42px;
+    }
     .ghost-btn {
       border: 1px solid #d1d5db; background: #fff; color: #111827; padding: 8px 12px;
       border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 13px;
@@ -68,7 +88,10 @@
       background: #e5e7eb; color: #1f2a37; margin-left: auto; cursor: pointer;
       border: 0; font-weight: 600; white-space: nowrap;
     }
-    @media (max-width: 720px) { .row { grid-template-columns: 1fr; } }
+    @media (max-width: 720px) {
+      .row { grid-template-columns: 1fr; }
+      .model-row, .model-list-head { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -99,23 +122,15 @@
         </div>
       </div>
 
-      <div class="row">
-        <div>
-          <label for="apimode" data-i18n="label_apimode">API模式</label>
-          <div class="field-wrapper">
-            <select id="apimode">
-              <!-- Options will be dynamically generated -->
-            </select>
-            <input type="text" id="apimode_custom" class="custom-input" data-i18n-placeholder="placeholder_apimode" placeholder="输入自定义 API 模式" />
-          </div>
-        </div>
-        <div>
-          <label for="model_id" data-i18n="label_model_id">模型ID</label>
-          <div class="model-list" id="modelList"></div>
-          <div class="model-actions">
-            <button type="button" id="addModelBtn" class="ghost-btn" data-i18n="btn_add_model">添加模型</button>
-          </div>
-        </div>
+      <label for="model_id" data-i18n="label_model_id">模型配置</label>
+      <div class="model-list-head">
+        <span data-i18n="label_model_name">模型 ID</span>
+        <span data-i18n="label_model_apimode">API模式</span>
+        <span data-i18n="label_model_capabilities">能力选项</span>
+      </div>
+      <div class="model-list" id="modelList"></div>
+      <div class="model-actions">
+        <button type="button" id="addModelBtn" class="ghost-btn" data-i18n="btn_add_model">添加模型</button>
       </div>
 
       <label for="apikey" data-i18n="label_apikey">API Key</label>
