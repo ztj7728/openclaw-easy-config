@@ -19,9 +19,10 @@ A lightweight web tool for quickly generating OpenClaw configuration files.
 
 | Provider | Base URL | Status | Api Mode |
 |----------|----------|--------|--------|
+| OpenRouter | `https://openrouter.ai/api/v1` | ✅ Tested | openai-completions |
 | DeepSeek | `https://api.deepseek.com` | ✅ Tested | openai-completions |
 | SiliconFlow | `https://api.siliconflow.cn` | ✅ Tested | openai-completions/anthropic-messages |
-| ollama | `http://localhost:11434` | ✅ Tested | openai-completions |
+| ollama | `http://localhost:11434/v1` | ✅ Tested | openai-completions |
 
 > Providers marked ✅ have been verified to work with OpenClaw. Untested providers may still work — contributions welcome!
 > Some providers' openai-completions endpoints only support /v1 (such as the new-api base), so if you cannot connect, I suggest you try adding /v1 after the api endpoint.

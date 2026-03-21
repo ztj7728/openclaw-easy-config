@@ -19,9 +19,10 @@
 
 | 供应商 | Base URL | 状态 | API模式 |
 |--------|----------|------|------|
+| OpenRouter | `https://openrouter.ai/api/v1` | ✅ 已测试 | openai-completions |
 | DeepSeek | `https://api.deepseek.com` | ✅ 已测试 | openai-completions |
 | SiliconFlow | `https://api.siliconflow.cn` | ✅ 已测试 | openai-completions/anthropic-messages |
-| ollama | `http://localhost:11434` | ✅ 已测试 | openai-completions |
+| ollama | `http://localhost:11434/v1` | ✅ 已测试 | openai-completions |
 
 > 标记 ✅ 的供应商已验证可在 OpenClaw 中正常使用。未测试的供应商可能同样可用，欢迎贡献测试结果！
 > 某些提供商的openai-completions端点仅支持/v1（如new-api基座），所以若无法连通，我希望您可以尝试在api端点后方添加/v1。
