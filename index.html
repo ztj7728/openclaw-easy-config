@@ -51,17 +51,38 @@
       display: none; margin-top: 8px; width: 100%; box-sizing: border-box;
     }
     .custom-input.show { display: block; }
+    .toggle-card {
+      margin-top: 18px; padding: 14px 16px; border: 1px solid #d9dee7; border-radius: 12px;
+      background: linear-gradient(180deg, #fbfcfe 0%, #f4f7fb 100%);
+    }
+    .toggle-line {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0;
+    }
+    .toggle-line span {
+      display: block; font-weight: 600;
+    }
+    .toggle-line input {
+      width: 18px; height: 18px; margin: 0; accent-color: #2563eb; flex: 0 0 auto;
+    }
+    .section-panel {
+      display: none; margin-top: 12px; padding: 16px; border: 1px solid #d9dee7;
+      border-radius: 12px; background: #fbfcfe;
+    }
+    .section-panel.show { display: block; }
+    .section-panel .toggle-card { margin-top: 0; }
+    .section-stack { display: grid; gap: 24px; }
     .model-list { display: grid; gap: 10px; }
     .model-row {
-      display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(220px, .9fr); gap: 16px; align-items: start;
+      display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(240px, .9fr) auto; gap: 16px; align-items: center;
     }
     .model-row .field-wrapper { width: 100%; }
     .model-list-head {
-      display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(220px, .9fr); gap: 16px;
+      display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(240px, .9fr) auto; gap: 16px;
       margin-bottom: 8px; font-size: 12px; color: #6b7280; font-weight: 600;
+      align-items: center;
     }
     .model-capabilities {
-      display: grid; gap: 10px; padding: 12px; border: 1px solid #d9dee7; border-radius: 12px;
+      display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 12px; border: 1px solid #d9dee7; border-radius: 12px;
       background: linear-gradient(180deg, #fbfcfe 0%, #f4f7fb 100%);
     }
     .capability-option {
@@ -73,9 +94,10 @@
     }
     .model-actions { display: flex; gap: 8px; margin-top: 8px; }
     .remove-model {
-      grid-column: 1 / -1;
-      justify-self: end;
-      min-height: 42px;
+      flex: 0 0 auto;
+      min-height: 40px;
+      white-space: nowrap;
+      align-self: center;
     }
     .ghost-btn {
       border: 1px solid #d1d5db; background: #fff; color: #111827; padding: 8px 12px;
@@ -91,6 +113,7 @@
     @media (max-width: 720px) {
       .row { grid-template-columns: 1fr; }
       .model-row, .model-list-head { grid-template-columns: 1fr; }
+      .remove-model { width: 100%; }
     }
   </style>
 </head>
@@ -127,6 +150,7 @@
         <span data-i18n="label_model_name">模型 ID</span>
         <span data-i18n="label_model_apimode">API模式</span>
         <span data-i18n="label_model_capabilities">能力选项</span>
+        <span aria-hidden="true"></span>
       </div>
       <div class="model-list" id="modelList"></div>
       <div class="model-actions">
@@ -135,6 +159,74 @@
 
       <label for="apikey" data-i18n="label_apikey">API Key</label>
       <input id="apikey" data-i18n-placeholder="placeholder_apikey" placeholder="请输入 apikey，请至第三方API站中的令牌管理处获取" />
+
+      <div class="toggle-card">
+        <label class="toggle-line" for="memorySearchEnabled">
+          <span data-i18n="label_memorysearch_enable">启用 memorySearch 向量记忆检索</span>
+          <input type="checkbox" id="memorySearchEnabled" />
+        </label>
+        <div class="muted" data-i18n="memorysearch_hint">默认关闭。开启后可配置向量检索模型与远端嵌入服务。</div>
+      </div>
+
+      <div id="memorySearchPanel" class="section-panel">
+        <div class="section-stack">
+          <div class="row">
+            <div>
+              <label for="memorysearch_provider" data-i18n="label_memorysearch_provider">MemorySearch Provider</label>
+              <div class="field-wrapper">
+                <select id="memorysearch_provider">
+                  <!-- Options will be dynamically generated -->
+                </select>
+                <input type="text" id="memorysearch_provider_custom" class="custom-input" data-i18n-placeholder="placeholder_memorysearch_provider" placeholder="输入自定义 memorySearch provider" />
+              </div>
+            </div>
+            <div>
+              <label for="memorysearch_model" data-i18n="label_memorysearch_model">Embedding Model</label>
+              <div class="field-wrapper">
+                <select id="memorysearch_model">
+                  <!-- Options will be dynamically generated -->
+                </select>
+                <input type="text" id="memorysearch_model_custom" class="custom-input" data-i18n-placeholder="placeholder_memorysearch_model" placeholder="输入自定义 embedding model" />
+              </div>
+            </div>
+          </div>
+
+          <div class="toggle-card">
+            <label class="toggle-line" for="memorysearch_use_chat_remote">
+              <span data-i18n="label_memorysearch_use_chat_remote">复用主聊天配置的 Base URL 与 API Key</span>
+              <input type="checkbox" id="memorysearch_use_chat_remote" checked />
+            </label>
+            <div class="muted" data-i18n="memorysearch_remote_hint">勾选后会直接使用上方聊天模型配置里的 Base URL 与 API Key。</div>
+          </div>
+
+          <div id="memorySearchRemotePanel" class="section-panel">
+            <div class="row">
+              <div>
+                <label for="memorysearch_remote_baseurl" data-i18n="label_memorysearch_remote_baseurl">MemorySearch Base URL</label>
+                <div class="field-wrapper">
+                  <select id="memorysearch_remote_baseurl">
+                    <!-- Options will be dynamically generated -->
+                  </select>
+                  <input type="text" id="memorysearch_remote_baseurl_custom" class="custom-input" data-i18n-placeholder="placeholder_memorysearch_remote_baseurl" placeholder="输入自定义 memorySearch Base URL" />
+                </div>
+              </div>
+              <div>
+                <label for="memorysearch_remote_provider" data-i18n="label_memorysearch_remote_provider">MemorySearch Remote Provider</label>
+                <div class="field-wrapper">
+                  <select id="memorysearch_remote_provider">
+                    <!-- Options will be dynamically generated -->
+                  </select>
+                  <input type="text" id="memorysearch_remote_provider_custom" class="custom-input" data-i18n-placeholder="placeholder_memorysearch_remote_provider" placeholder="输入自定义远端提供商" />
+                </div>
+              </div>
+            </div>
+
+            <label for="memorysearch_apikey" data-i18n="label_memorysearch_apikey">MemorySearch API Key</label>
+            <input id="memorysearch_apikey" data-i18n-placeholder="placeholder_memorysearch_apikey" placeholder="请输入 memorySearch API Key" />
+          </div>
+        </div>
+        </div>
+      </div>
 
       <label for="config" data-i18n="label_config">Config (JSON/JSON5/String)</label>
       <textarea id="config" data-i18n-placeholder="placeholder_config" placeholder="粘贴您的~/.openclaw/openclaw.json内容，或在您的openclaw的web控制台中的setting下的config选项卡中，切换为Raw模式找到"></textarea>

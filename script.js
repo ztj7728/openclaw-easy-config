@@ -4,6 +4,7 @@ const outputEl = document.getElementById("output");
 const copyBtn = document.getElementById("copyBtn");
 const modelListEl = document.getElementById("modelList");
 const addModelBtn = document.getElementById("addModelBtn");
+const apikeyInput = document.getElementById("apikey");
 
 // Provider to Base URL mapping - ONLY MAINTAIN THIS!
 const providerBaseUrlMap = {
@@ -45,38 +46,125 @@ const modelCapabilityPresetMap = {
   }
 };
 
+// MemorySearch embedding model to provider mapping - ONLY MAINTAIN THIS!
+const memorySearchModelProviderMap = {
+  "text-embedding-3-small": "openai",
+  "text-embedding-3-large": "openai",
+  "text-embedding-ada-002": "openai",
+  "gemini-embedding-2-preview": "gemini",
+  "gemini-embedding-001": "gemini"
+};
+
 const modelOptions = Object.keys(modelApiModeMap);
 const apimodeOptions = [...new Set(Object.values(modelApiModeMap))];
+const memorySearchModelOptions = Object.keys(memorySearchModelProviderMap);
+const memorySearchProviderOptions = [...new Set(Object.values(memorySearchModelProviderMap))];
+
+function hasOption(select, value) {
+  return Array.from(select.options).some(option => option.value === value);
+}
+
+function appendOption(select, value, label = value) {
+  const option = document.createElement("option");
+  option.value = value;
+  option.textContent = label;
+  select.appendChild(option);
+}
+
+function appendCustomOption(select) {
+  appendOption(select, "custom", t("custom"));
+}
+
+function getFieldValue(field) {
+  const select = document.getElementById(field);
+  if (select && select.tagName === "SELECT") {
+    if (select.value === "custom") {
+      const customInput = document.getElementById(`${field}_custom`);
+      return customInput ? customInput.value.trim() : "";
+    }
+    return select.value;
+  }
+
+  const input = document.getElementById(field);
+  return input ? input.value.trim() : "";
+}
+
+function setSelectOrCustomValue(select, customInput, value) {
+  if (!select || !customInput) {
+    return;
+  }
+
+  if (value && hasOption(select, value)) {
+    select.value = value;
+    customInput.value = "";
+    customInput.classList.remove("show");
+    return;
+  }
+
+  select.value = "custom";
+  customInput.value = value || "";
+  customInput.classList.add("show");
+}
 
 // Dynamically populate provider select
 const providerSelect = document.getElementById("provider");
 Object.keys(providerBaseUrlMap).forEach(provider => {
-  const option = document.createElement("option");
-  option.value = provider;
-  option.textContent = provider;
-  providerSelect.appendChild(option);
+  appendOption(providerSelect, provider);
 });
-const customProviderOption = document.createElement("option");
-customProviderOption.value = "custom";
-customProviderOption.textContent = t("custom");
-providerSelect.appendChild(customProviderOption);
+appendCustomOption(providerSelect);
 
 // Dynamically populate baseurl select
 const baseurlSelect = document.getElementById("baseurl");
 const uniqueUrls = [...new Set(Object.values(providerBaseUrlMap))];
 uniqueUrls.forEach(url => {
-  const option = document.createElement("option");
-  option.value = url;
-  option.textContent = url;
-  baseurlSelect.appendChild(option);
+  appendOption(baseurlSelect, url);
 });
-const customBaseurlOption = document.createElement("option");
-customBaseurlOption.value = "custom";
-customBaseurlOption.textContent = t("custom");
-baseurlSelect.appendChild(customBaseurlOption);
+appendCustomOption(baseurlSelect);
+
+const memorySearchEnabledCheckbox = document.getElementById("memorySearchEnabled");
+const memorySearchPanel = document.getElementById("memorySearchPanel");
+const memorySearchProviderSelect = document.getElementById("memorysearch_provider");
+const memorySearchProviderCustom = document.getElementById("memorysearch_provider_custom");
+const memorySearchModelSelect = document.getElementById("memorysearch_model");
+const memorySearchModelCustom = document.getElementById("memorysearch_model_custom");
+const memorySearchReuseRemoteCheckbox = document.getElementById("memorysearch_use_chat_remote");
+const memorySearchRemotePanel = document.getElementById("memorySearchRemotePanel");
+const memorySearchRemoteProviderSelect = document.getElementById("memorysearch_remote_provider");
+const memorySearchRemoteProviderCustom = document.getElementById("memorysearch_remote_provider_custom");
+const memorySearchRemoteBaseurlSelect = document.getElementById("memorysearch_remote_baseurl");
+const memorySearchRemoteBaseurlCustom = document.getElementById("memorysearch_remote_baseurl_custom");
+const memorySearchApikeyInput = document.getElementById("memorysearch_apikey");
+let hasSeededMemorySearchRemoteFields = false;
+
+memorySearchProviderOptions.forEach(provider => {
+  appendOption(memorySearchProviderSelect, provider);
+});
+appendCustomOption(memorySearchProviderSelect);
+
+memorySearchModelOptions.forEach(model => {
+  appendOption(memorySearchModelSelect, model);
+});
+appendCustomOption(memorySearchModelSelect);
+
+Object.keys(providerBaseUrlMap).forEach(provider => {
+  appendOption(memorySearchRemoteProviderSelect, provider);
+});
+appendCustomOption(memorySearchRemoteProviderSelect);
+
+uniqueUrls.forEach(url => {
+  appendOption(memorySearchRemoteBaseurlSelect, url);
+});
+appendCustomOption(memorySearchRemoteBaseurlSelect);
 
 // Handle custom input visibility
-const fields = ["baseurl", "provider"];
+const fields = [
+  "baseurl",
+  "provider",
+  "memorysearch_provider",
+  "memorysearch_model",
+  "memorysearch_remote_baseurl",
+  "memorysearch_remote_provider"
+];
 fields.forEach(field => {
   const select = document.getElementById(field);
   const customInput = document.getElementById(`${field}_custom`);
@@ -89,6 +177,100 @@ fields.forEach(field => {
     }
   });
 });
+
+function syncMemorySearchProviderWithModel(modelId) {
+  if (!modelId || !memorySearchModelProviderMap[modelId]) {
+    return;
+  }
+
+  memorySearchProviderSelect.value = memorySearchModelProviderMap[modelId];
+  memorySearchProviderCustom.classList.remove("show");
+}
+
+function syncMemorySearchModelWithProvider(provider) {
+  if (!provider) {
+    return;
+  }
+
+  const providerModel = memorySearchModelOptions.find(modelId => memorySearchModelProviderMap[modelId] === provider);
+  if (!providerModel) {
+    return;
+  }
+
+  memorySearchModelSelect.value = providerModel;
+  memorySearchModelCustom.classList.remove("show");
+}
+
+function syncRemoteBaseurlWithProvider(provider, select, customInput) {
+  if (!provider || !providerBaseUrlMap[provider]) {
+    return;
+  }
+
+  select.value = providerBaseUrlMap[provider];
+  if (customInput) {
+    customInput.classList.remove("show");
+  }
+}
+
+function memorySearchRemoteFieldsAreEmpty() {
+  return !getFieldValue("memorysearch_remote_provider")
+    && !getFieldValue("memorysearch_remote_baseurl")
+    && !memorySearchApikeyInput.value.trim();
+}
+
+function seedMemorySearchRemoteFieldsFromPrimaryConfig() {
+  if (hasSeededMemorySearchRemoteFields && !memorySearchRemoteFieldsAreEmpty()) {
+    return;
+  }
+
+  setSelectOrCustomValue(memorySearchRemoteProviderSelect, memorySearchRemoteProviderCustom, getFieldValue("provider"));
+  setSelectOrCustomValue(memorySearchRemoteBaseurlSelect, memorySearchRemoteBaseurlCustom, getFieldValue("baseurl"));
+  memorySearchApikeyInput.value = apikeyInput.value.trim();
+  hasSeededMemorySearchRemoteFields = true;
+}
+
+function updateMemorySearchRemoteVisibility() {
+  const shouldShowRemotePanel = memorySearchEnabledCheckbox.checked && !memorySearchReuseRemoteCheckbox.checked;
+  memorySearchRemotePanel.classList.toggle("show", shouldShowRemotePanel);
+
+  if (shouldShowRemotePanel) {
+    seedMemorySearchRemoteFieldsFromPrimaryConfig();
+  }
+}
+
+function updateMemorySearchVisibility() {
+  const isEnabled = memorySearchEnabledCheckbox.checked;
+  memorySearchPanel.classList.toggle("show", isEnabled);
+
+  if (isEnabled) {
+    if (!memorySearchModelSelect.value && memorySearchModelOptions.length) {
+      memorySearchModelSelect.value = memorySearchModelOptions[0];
+    }
+    if (!memorySearchProviderSelect.value && memorySearchProviderOptions.length) {
+      memorySearchProviderSelect.value = memorySearchProviderOptions[0];
+    }
+    syncMemorySearchProviderWithModel(memorySearchModelSelect.value);
+  }
+
+  updateMemorySearchRemoteVisibility();
+}
+
+function getMemorySearchConfig() {
+  if (!memorySearchEnabledCheckbox.checked) {
+    return null;
+  }
+
+  const usePrimaryRemote = memorySearchReuseRemoteCheckbox.checked;
+  return {
+    enabled: true,
+    provider: getFieldValue("memorysearch_provider"),
+    model: getFieldValue("memorysearch_model"),
+    remote: {
+      baseUrl: usePrimaryRemote ? getFieldValue("baseurl") : getFieldValue("memorysearch_remote_baseurl"),
+      apiKey: usePrimaryRemote ? apikeyInput.value.trim() : memorySearchApikeyInput.value.trim()
+    }
+  };
+}
 
 function updateModelRemoveState() {
   const removeButtons = modelListEl.querySelectorAll(".remove-model");
@@ -302,6 +484,50 @@ addModelBtn.addEventListener("click", () => {
 
 createModelRow();
 
+if (memorySearchModelOptions.length) {
+  memorySearchModelSelect.value = memorySearchModelOptions[0];
+  syncMemorySearchProviderWithModel(memorySearchModelOptions[0]);
+}
+
+memorySearchEnabledCheckbox.addEventListener("change", updateMemorySearchVisibility);
+memorySearchReuseRemoteCheckbox.addEventListener("change", updateMemorySearchRemoteVisibility);
+
+memorySearchModelSelect.addEventListener("change", () => {
+  if (memorySearchModelSelect.value === "custom") {
+    memorySearchModelCustom.classList.add("show");
+    return;
+  }
+
+  memorySearchModelCustom.classList.remove("show");
+  syncMemorySearchProviderWithModel(memorySearchModelSelect.value);
+});
+
+memorySearchProviderSelect.addEventListener("change", () => {
+  if (memorySearchProviderSelect.value === "custom") {
+    memorySearchProviderCustom.classList.add("show");
+    return;
+  }
+
+  memorySearchProviderCustom.classList.remove("show");
+  syncMemorySearchModelWithProvider(memorySearchProviderSelect.value);
+});
+
+memorySearchRemoteProviderSelect.addEventListener("change", () => {
+  if (memorySearchRemoteProviderSelect.value === "custom") {
+    memorySearchRemoteProviderCustom.classList.add("show");
+    return;
+  }
+
+  memorySearchRemoteProviderCustom.classList.remove("show");
+  syncRemoteBaseurlWithProvider(
+    memorySearchRemoteProviderSelect.value,
+    memorySearchRemoteBaseurlSelect,
+    memorySearchRemoteBaseurlCustom
+  );
+});
+
+updateMemorySearchVisibility();
+
 // Bind provider to baseurl
 const baseurlCustom = document.getElementById("baseurl_custom");
 
@@ -353,20 +579,13 @@ copyBtn.addEventListener("click", async () => {
 });
 
 sendBtn.addEventListener("click", async () => {
-  const getValue = (field) => {
-    const select = document.getElementById(field);
-    if (select.value === "custom") {
-      return document.getElementById(`${field}_custom`).value.trim();
-    }
-    return select.value;
-  };
-
   const payload = {
     config: document.getElementById("config").value.trim(),
-    baseurl: getValue("baseurl"),
-    apikey: document.getElementById("apikey").value.trim(),
-    provider: getValue("provider"),
-    models: getModelConfigs()
+    baseurl: getFieldValue("baseurl"),
+    apikey: apikeyInput.value.trim(),
+    provider: getFieldValue("provider"),
+    models: getModelConfigs(),
+    memorySearch: getMemorySearchConfig()
   };
 
   // Validation
@@ -400,6 +619,26 @@ sendBtn.addEventListener("click", async () => {
     setStatus(t("status_failed"));
     return;
   }
+  if (payload.memorySearch && !payload.memorySearch.provider) {
+    outputEl.textContent = t("err_no_memorysearch_provider");
+    setStatus(t("status_failed"));
+    return;
+  }
+  if (payload.memorySearch && !payload.memorySearch.model) {
+    outputEl.textContent = t("err_no_memorysearch_model");
+    setStatus(t("status_failed"));
+    return;
+  }
+  if (payload.memorySearch && !payload.memorySearch.remote.baseUrl) {
+    outputEl.textContent = t("err_no_memorysearch_baseurl");
+    setStatus(t("status_failed"));
+    return;
+  }
+  if (payload.memorySearch && !payload.memorySearch.remote.apiKey) {
+    outputEl.textContent = t("err_no_memorysearch_apikey");
+    setStatus(t("status_failed"));
+    return;
+  }
 
   setStatus(t("status_processing"));
   sendBtn.disabled = true;
@@ -420,6 +659,7 @@ sendBtn.addEventListener("click", async () => {
 function processConfig(payload) {
   try {
     const modelConfigs = payload.models;
+    const memorySearchConfig = payload.memorySearch;
     const primaryModelId = modelConfigs[0].id;
     const primaryImageModel = modelConfigs.find(model => model.supportsImageInput);
 
@@ -485,7 +725,8 @@ function processConfig(payload) {
           ...existingAgentDefaults,
           model: agents.defaults.model,
           models: agents.defaults.models,
-          ...(nextImageModelDefaults ? { imageModel: nextImageModelDefaults } : {})
+          ...(nextImageModelDefaults ? { imageModel: nextImageModelDefaults } : {}),
+          ...(memorySearchConfig ? { memorySearch: memorySearchConfig } : {})
         }
       }
     };
